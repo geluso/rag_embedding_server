@@ -11,16 +11,21 @@ docs = [
     DocumentPayload("Adverse possession", "https://en.wikipedia.org/wiki/Adverse_possession", "Adverse possession in common law, and the related civil law concept of usucaption (also acquisitive prescription or prescriptive acquisition), are legal mechanisms under which a person who does not have legal title to a piece of property, usually real property, may acquire legal ownership based on continuous possession or occupation without the permission (licence) of its legal owner.[1]")
 ]
 
+law_url = "https://law.justia.com/codes/georgia/title-34/chapter-8/article-4/section-34-8-125/"
+text = open("./georgia_data_law.txt").read()
+print(text)
+
+
 localhost = "http://localhost:8080"
 ngrok_url = "https://4cb3-2601-602-8b82-92b0-64d0-4b7b-a51a-85fb.ngrok-free.app"
 base_url = ngrok_url
 url_add_document = base_url + "/add_document/"
 url_search = base_url + "/search/"
 
-# for doc in docs:
-#     response = requests.post(url_add_document, json=doc.to_dict())
-#     print(response.text)
+for doc in docs:
+    response = requests.post(url_add_document, json=doc.to_dict())
+    print(response.text)
 
-query = "What are the legal implications of breach of contract?"
-response = requests.get(url_search + "?q=" + query)
-print(response.text)
+#query = "What are the legal implications of breach of contract?"
+#response = requests.get(url_search + "?q=" + query)
+#print(response.text)
