@@ -35,8 +35,8 @@ def add_summary(conn, id, summary):
 def find_one_text_embedding_metadata(conn, label):
     with conn.cursor() as cur:
         cur.execute("""
-            SELECT * FROM text_embedding_metadata WHERE label = '%s'
-        """, label)
+            SELECT * FROM text_embedding_metadata WHERE label = %s
+        """, (label,))
         row_id, parent_id, datatype, label, summary = cur.fetchone()
         return row_id, parent_id, datatype, label, summary
 

@@ -20,9 +20,10 @@ app = Flask(__name__)
 
 @app.route("/metadata/", methods=["GET"])
 def get_metadata():
+    conn = create_default_connection()
     label = request.args.get('label')
-    row_id, parent_id, datatype, label, summary = find_one_text_embedding_metadata(label)
-    return jsonify({"rowId": row_id, "parentId": parent_id, "datatype": datatype, "label": label, "summary": summary})
+    row_id, parent_id, datatype, label, summary = find_one_text_embedding_metadata(conn, label)
+    return jsonify({"id": row_id, "parentId": parent_id, "datatype": datatype, "label": label, "summary": summary})
 
 # parent_id, datatype, label, summary) VALUES (%s, %s, %s, %s)",
 @app.route("/metadata/", methods=["POST"])
@@ -34,7 +35,9 @@ def create_metadata():
     summary = ''
 
     conn = create_default_connection()
-    create_text_embedding_metadata(parent_id, datatype, label, summary)
+    create_text_embedding_metadata(conn, parent_id, datatype, label, summary)
+    row_id, parent_id, datatype, label, summary = find_one_text_embedding_metadata(conn, label)
+    return jsonify({"id": row_id, "parentId": parent_id, "datatype": datatype, "label": label, "summary": summary})
 
 @app.route("/metadata/", methods=["PUT"])
 def update_metadata():
