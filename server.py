@@ -79,6 +79,7 @@ def embed_text():
 def search():
     query = request.args.get("q", "")
     results = vectorstore.similarity_search_with_score(query)
+    print(results)
     response = []
     for lang_doc, score in results:
         title = lang_doc.metadata['title']
@@ -89,6 +90,19 @@ def search():
             "score": float(score),
             "doc": doc.to_dict()
         })
+    return jsonify(response)
+
+@app.route("/documents/", methods=["GET"])
+def documents_index():
+    docs = vectorstore.get()
+    response = []
+    breakpoint()
+    for text  in docs['documents']:
+        title = lang_doc.metadata['title']
+        url = lang_doc.metadata['url'] 
+        text = lang_doc.page_content
+        doc = DocumentPayload(title, url, text)
+        response.append(doc.to_dict())
     return jsonify(response)
 
 if __name__ == "__main__":
