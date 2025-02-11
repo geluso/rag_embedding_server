@@ -3,3 +3,4 @@ chroma_db
 chroma_db*
 *.swp
 __pycache__/
+backup

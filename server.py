@@ -130,7 +130,9 @@ def get_url(lang_doc):
 def search():
     query = request.args.get("q", "")
     results = vectorstore.similarity_search_with_score(query)
-    print(results)
+    print(len(results), "results")
+    for result in results:
+        print(result)
     response = []
     for lang_doc, score in results:
         title = get_label(lang_doc)
