@@ -78,7 +78,7 @@ def http_get_section_by_id():
             "chunks": chunks['documents']
         })
     except Exception as e:
-        return jsonify({ "section": {}, chunks: []})
+        return jsonify({ "section": {}, "chunks": []})
 
 @app.route("/chunks/", methods=["POST"])
 def create_chunk():
@@ -112,6 +112,20 @@ def embed_text():
 
     return doc.to_json()
 
+def get_label(lang_doc):
+    if "title" in lang_doc.metadata:
+        return lang_doc.metadata['title']
+    if "label" in lang_doc.metadata:
+        return lang_doc.metadata['label']
+    return ""
+
+def get_url(lang_doc):
+    if "url" in lang_doc.metadata:
+        return lang_doc.metadata['url']
+    if "source" in lang_doc.metadata:
+        return lang_doc.metadata['source']
+    return ""
+
 @app.route("/search/", methods=["GET"])
 def search():
     query = request.args.get("q", "")
@@ -119,8 +133,8 @@ def search():
     print(results)
     response = []
     for lang_doc, score in results:
-        title = lang_doc.metadata['title']
-        url = lang_doc.metadata['url']
+        title = get_label(lang_doc)
+        url = get_url(lang_doc)
         text = lang_doc.page_content
         doc = DocumentPayload(title, url, text)
         response.append({
