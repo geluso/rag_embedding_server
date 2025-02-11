@@ -30,7 +30,12 @@ def create_text_embedding_metadata(conn, parent_id, datatype, label, summary='')
     conn.commit()
 
 def add_summary(conn, id, summary):
-  pass
+    with conn.cursor() as cur:
+        cur.execute(
+            "UPDATE text_embedding_metadata SET summary = %s WHERE id = %s",
+            (summary, id)
+        )
+    conn.commit()
 
 def find_one_text_embedding_metadata(conn, label):
     with conn.cursor() as cur:
@@ -47,3 +52,11 @@ def get_all_text_embedding_metadata(conn):
         """)
         rows = cur.fetchall()
         return rows
+
+def find_one_text_embedding_metadata_by_id(conn, id):
+    with conn.cursor() as cur:
+        cur.execute("""
+            SELECT * FROM text_embedding_metadata WHERE id = %s
+        """, (id,))
+        row_id, parent_id, datatype, label, summary = cur.fetchone()
+        return row_id, parent_id, datatype, label, summary

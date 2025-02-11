@@ -7,7 +7,7 @@ from langchain_chroma import Chroma
 
 from document_payload import DocumentPayload
 
-from db import create_default_connection, create_text_embedding_metadata, find_one_text_embedding_metadata
+from db import create_default_connection, create_text_embedding_metadata, find_one_text_embedding_metadata, find_one_text_embedding_metadata_by_id, add_summary
 
 embeddings = HuggingFaceEmbeddings(model_name="nlpaueb/legal-bert-base-uncased")
 persist_directory = "./chroma_db"
@@ -22,8 +22,11 @@ app = Flask(__name__)
 def get_metadata():
     conn = create_default_connection()
     label = request.args.get('label')
-    row_id, parent_id, datatype, label, summary = find_one_text_embedding_metadata(conn, label)
-    return jsonify({"id": row_id, "parentId": parent_id, "datatype": datatype, "label": label, "summary": summary})
+    try:
+        row_id, parent_id, datatype, label, summary = find_one_text_embedding_metadata(conn, label)
+        return jsonify({"id": row_id, "parentId": parent_id, "datatype": datatype, "label": label, "summary": summary})
+    except Exception as e:
+        return jsonify({})
 
 # parent_id, datatype, label, summary) VALUES (%s, %s, %s, %s)",
 @app.route("/metadata/", methods=["POST"])
@@ -31,7 +34,7 @@ def create_metadata():
     data = request.json
     parent_id = data.get("parentId", "")
     datatype = data.get("datatype", "")
-    label = data.get("label", "")
+    label = data.get("label", "")[:255]
     summary = ''
 
     conn = create_default_connection()
@@ -39,9 +42,43 @@ def create_metadata():
     row_id, parent_id, datatype, label, summary = find_one_text_embedding_metadata(conn, label)
     return jsonify({"id": row_id, "parentId": parent_id, "datatype": datatype, "label": label, "summary": summary})
 
+# This only updates `summary` right now`
 @app.route("/metadata/", methods=["PUT"])
 def update_metadata():
-    pass
+    section_id = request.args.get('id')
+    data = request.json
+    summary = data.get("summary", "")
+
+    try:
+        conn = create_default_connection()
+        add_summary(conn, section_id, summary)
+        return jsonify({"error": False})
+    except Exception as e:
+        print(e)
+        return jsonify({"error": True})
+
+@app.route("/sections/", methods=["GET"])
+def http_get_section_by_id():
+    conn = create_default_connection()
+    section_id = request.args.get('id')
+    try:
+        # retrieve all the metadata for the section in the SQL database
+        row_id, parent_id, datatype, label, summary = find_one_text_embedding_metadata_by_id(conn, section_id)
+
+        # retrieve all the chunks for the section from the vector store
+        chunks = vectorstore.get(where={"parent_id": int(section_id)})
+        return jsonify({
+            "section": {
+                "id": row_id,
+                "parentId": parent_id,
+                "datatype": datatype,
+                "label": label,
+                "summary": summary
+            },
+            "chunks": chunks['documents']
+        })
+    except Exception as e:
+        return jsonify({ "section": {}, chunks: []})
 
 @app.route("/chunks/", methods=["POST"])
 def create_chunk():
@@ -58,7 +95,7 @@ def create_chunk():
     lang_doc = Document(page_content=text, id=doc_id, metadata=metadata)
     vectorstore.add_documents(documents=[lang_doc])
 
-    return doc_id
+    return jsonify({"id": doc_id})
     
 
 @app.route("/add_document/", methods=["POST"])
