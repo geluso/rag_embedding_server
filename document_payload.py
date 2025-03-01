@@ -5,6 +5,7 @@ class DocumentPayload:
         self.id = str(uuid4())
         self.url = url
         self.text = text
+        self.chunk_index = chunk_index
 
     def to_metadata(self):
         return {
