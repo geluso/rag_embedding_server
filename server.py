@@ -104,7 +104,6 @@ def embed_text():
     url = data.get("url", "")
     text = data.get("text", "")
     chunk_index = data.get("chunk_index", -1)
-    breakpoint()
 
     doc = DocumentPayload(url, text, chunk_index)
     lang_doc = Document(page_content=text, id=doc.id, metadata=doc.to_metadata())
