@@ -102,10 +102,11 @@ def create_chunk():
 def embed_text():
     data = request.json
     url = data.get("url", "")
-    title = data.get("title", "")
     text = data.get("text", "")
+    chunk_index = data.get("chunk_index", -1)
+    breakpoint()
 
-    doc = DocumentPayload(title, url, text)
+    doc = DocumentPayload(url, text, chunk_index)
     lang_doc = Document(page_content=text, id=doc.id, metadata=doc.to_metadata())
     
     vectorstore.add_documents(documents=[lang_doc])
