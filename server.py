@@ -110,7 +110,7 @@ def embed_text():
     
     vectorstore.add_documents(documents=[lang_doc])
 
-    return doc.to_json()
+    return "SCV good to go sir"
 
 def get_label(lang_doc):
     if "title" in lang_doc.metadata:
@@ -138,7 +138,8 @@ def search():
         title = get_label(lang_doc)
         url = get_url(lang_doc)
         text = lang_doc.page_content
-        doc = DocumentPayload(title, url, text)
+        chunk_index = lang_doc.metadata['chunk_index']
+        doc = DocumentPayload(url, text, chunk_index)
         response.append({
             "score": float(score),
             "doc": doc.to_dict()
@@ -147,16 +148,9 @@ def search():
 
 @app.route("/documents/", methods=["GET"])
 def documents_index():
-    docs = vectorstore.get()
-    response = []
-    breakpoint()
-    for text  in docs['documents']:
-        title = lang_doc.metadata['title']
-        url = lang_doc.metadata['url'] 
-        text = lang_doc.page_content
-        doc = DocumentPayload(title, url, text)
-        response.append(doc.to_dict())
-    return jsonify(response)
+    results = vectorstore.get()
+    docs = results["documents"]
+    return jsonify({"total": len(docs)})
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=8080)

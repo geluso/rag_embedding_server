@@ -12,3 +12,11 @@ class DocumentPayload:
             "url": self.url,
             "chunk_index": self.chunk_index,
         }
+
+    def to_dict(self):
+        return {
+            "url": self.url,
+            "text": self.text,
+            "chunk_index": self.chunk_index
+        }
+
