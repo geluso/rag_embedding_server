@@ -129,7 +129,8 @@ def get_url(lang_doc):
 @app.route("/search/", methods=["GET"])
 def search():
     query = request.args.get("q", "")
-    results = vectorstore.similarity_search_with_score(query)
+    limit = request.args.get("limit", 10)
+    results = vectorstore.similarity_search_with_score(query, limit)
     print(len(results), "results")
     for result in results:
         print(result)
@@ -144,6 +145,7 @@ def search():
             "score": float(score),
             "doc": doc.to_dict()
         })
+    response.reverse()
     return jsonify(response)
 
 @app.route("/documents/", methods=["GET"])
