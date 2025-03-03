@@ -129,7 +129,7 @@ def get_url(lang_doc):
 @app.route("/search/", methods=["GET"])
 def search():
     query = request.args.get("q", "")
-    limit = request.args.get("limit", 10)
+    limit = int(request.args.get("limit", 10))
     results = vectorstore.similarity_search_with_score(query, limit)
     print(len(results), "results")
     for result in results:
